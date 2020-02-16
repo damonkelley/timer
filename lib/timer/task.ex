@@ -5,8 +5,8 @@ defmodule Timer.Task do
     {:ok, state}
   end
 
-  def start_link(%{name: name} = task) do
-    GenServer.start_link(__MODULE__, put_in(task, [:started], false), name: via_tuple(name))
+  def start_link(task, opts \\ []) do
+    GenServer.start_link(__MODULE__, put_in(task, [:started], false), opts)
   end
 
   def handle_call(:get, _from, task) do
@@ -39,9 +39,5 @@ defmodule Timer.Task do
 
   def handle_call(:tick, _from, task) do
     {:reply, task, task}
-  end
-
-  defp via_tuple(name) do
-    {:via, Registry, {Timer.Registry, name}}
   end
 end

@@ -9,8 +9,8 @@ defmodule TimerTest do
       {:ok, state}
     end
 
-    def start_link(%{name: name} = task) do
-      GenServer.start_link(__MODULE__, put_in(task, [:started], false), name: via_tuple(name))
+    def start_link(task, opts) do
+      GenServer.start_link(__MODULE__, put_in(task, [:started], false), opts)
     end
 
     def handle_call(:get, _from, %{started: true, duration: duration} = task) do
@@ -26,17 +26,11 @@ defmodule TimerTest do
       task = %{task | started: true}
       {:reply, task, task}
     end
-
-    defp via_tuple(name) do
-      {:via, Registry, {Timer.Registry, name}}
-    end
   end
 
   setup do
-    {:ok, pid} = Application.ensure_all_started(:timer)
+    {:ok, _pid} = Application.ensure_all_started(:timer)
     on_exit(fn -> Application.stop(:timer) end)
-
-    {:ok, pid: pid}
   end
 
   test "a task can be added" do
@@ -68,7 +62,6 @@ defmodule TimerTest do
 
     Timer.begin('Do homework')
 
-    expected = %{duration: 5 * 60 - 1}
     assert %{duration: 299} = Timer.show() |> List.first()
   end
 end
