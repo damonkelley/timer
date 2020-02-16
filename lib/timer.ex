@@ -9,13 +9,17 @@ defmodule Timer do
     spec =
       Supervisor.child_spec({type, task}, start: {type, :start_link, [task, [name: via(name)]]})
 
-    {:ok, pid} = DynamicSupervisor.start_child(Timer.TaskSupervisor, spec)
+    {:ok, _pid} = DynamicSupervisor.start_child(Timer.TaskSupervisor, spec)
 
     {:ok, [task]}
   end
 
   def begin(name) do
     GenServer.call(via(name), :begin)
+  end
+
+  def pause(name) do
+    GenServer.call(via(name), :pause)
   end
 
   def show do

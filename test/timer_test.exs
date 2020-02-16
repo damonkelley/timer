@@ -1,5 +1,5 @@
 defmodule TimerTest do
-  use ExUnit.Case, async: false
+  use ExUnit.Case
   doctest Timer
 
   defmodule TestTaskServer do
@@ -24,6 +24,11 @@ defmodule TimerTest do
 
     def handle_call(:begin, _from, task) do
       task = %{task | started: true}
+      {:reply, task, task}
+    end
+
+    def handle_call(:pause, _from, task) do
+      task = %{task | started: false}
       {:reply, task, task}
     end
   end
@@ -63,5 +68,19 @@ defmodule TimerTest do
     Timer.begin('Do homework')
 
     assert %{duration: 299} = Timer.show() |> List.first()
+  end
+
+  test "it can pause a task" do
+    tasks = [
+      %{duration: 5 * 60, name: 'Do homework'},
+      %{duration: 5 * 60, name: 'Do more homework'}
+    ]
+
+    tasks |> Enum.map(&Timer.add(&1, TestTaskServer))
+
+    Timer.begin('Do homework')
+    Timer.pause('Do homework')
+
+    assert %{started: false} = Timer.show() |> List.first()
   end
 end
