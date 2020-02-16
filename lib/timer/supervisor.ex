@@ -10,7 +10,8 @@ defmodule Timer.Supervisor do
     children = [
       {Registry, keys: :unique, name: Timer.Registry},
       {Registry, keys: :duplicate, name: Timer.Notifications},
-      {DynamicSupervisor, strategy: :one_for_one, name: Timer.TaskSupervisor}
+      {DynamicSupervisor, strategy: :one_for_one, name: Timer.TaskSupervisor},
+      {Timer.Tick, []}
     ]
 
     Supervisor.init(children, strategy: :one_for_one)

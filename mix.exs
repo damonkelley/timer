@@ -8,7 +8,8 @@ defmodule Timer.MixProject do
       elixir: "~> 1.10",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      aliases: aliases()
+      aliases: aliases(),
+      escript: escript()
     ]
   end
 
@@ -18,6 +19,10 @@ defmodule Timer.MixProject do
       extra_applications: [:logger],
       mod: {Timer, []}
     ]
+  end
+
+  defp escript do
+    [main_module: Console]
   end
 
   # Run "mix help deps" to learn about dependencies.
