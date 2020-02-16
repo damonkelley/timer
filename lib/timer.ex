@@ -12,7 +12,7 @@ defmodule Timer do
   end
 
   def begin(name) do
-    GenServer.cast(via(name), :begin)
+    GenServer.call(via(name), :begin)
   end
 
   def show do

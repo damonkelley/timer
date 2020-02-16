@@ -10,32 +10,25 @@ defmodule TimerTest do
     end
 
     def start_link(%{name: name} = task) do
-      GenServer.start_link(__MODULE__, %{started: false, task: task}, name: via_tuple(name))
+      GenServer.start_link(__MODULE__, put_in(task, [:started], false), name: via_tuple(name))
+    end
+
+    def handle_call(:get, _from, %{started: true, duration: duration} = task) do
+      new_task = %{task | duration: duration - 1}
+      {:reply, new_task, new_task}
+    end
+
+    def handle_call(:get, _, %{started: false} = task) do
+      {:reply, task, task}
+    end
+
+    def handle_call(:begin, _from, task) do
+      task = %{task | started: true}
+      {:reply, task, task}
     end
 
     defp via_tuple(name) do
       {:via, Registry, {Timer.Registry, name}}
-    end
-
-    def get(name) do
-      GenServer.call(via_tuple(name), :get)
-    end
-
-    def begin(name) do
-      GenServer.call(via_tuple(name), :begin)
-    end
-
-    def handle_call(:get, _from, %{started: true, task: %{duration: duration} = task} = state) do
-      new_task = %{task | duration: duration - 1}
-      {:reply, new_task, %{state | task: new_task}}
-    end
-
-    def handle_call(:get, _, %{started: false, task: task} = state) do
-      {:reply, task, state}
-    end
-
-    def handle_cast(:begin, state) do
-      {:noreply, %{state | started: true}}
     end
   end
 
@@ -53,13 +46,16 @@ defmodule TimerTest do
 
   test "it can list all the tasks" do
     tasks = [
-      %{duration: 5 * 60, name: 'Do homework'},
-      %{duration: 5 * 60, name: 'Do more homework'}
+      %{duration: 5 * 60, name: "Do homework"},
+      %{duration: 5 * 60, name: "Do more homework"}
     ]
 
     tasks |> Enum.map(&Timer.add(&1, TestTaskServer))
 
-    assert ^tasks = Timer.show()
+    assert [
+             %{duration: 300, name: "Do more homework", started: false},
+             %{duration: 300, name: "Do homework", started: false}
+           ] = Timer.show()
   end
 
   test "it can start a task" do
