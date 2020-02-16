@@ -2,8 +2,8 @@ defmodule Timer.TaskTest do
   use ExUnit.Case
 
   setup do
-    Application.start(:timer)
-    on_exit(fn -> Application.stop(:timer) end)
+    start_supervised(Timer.Supervisor)
+    :ok
   end
 
   test "it will respond with the current task", %{test: name} do

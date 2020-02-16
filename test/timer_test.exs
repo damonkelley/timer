@@ -29,8 +29,8 @@ defmodule TimerTest do
   end
 
   setup do
-    {:ok, _pid} = Application.ensure_all_started(:timer)
-    on_exit(fn -> Application.stop(:timer) end)
+    start_supervised(Timer.Supervisor)
+    :ok
   end
 
   test "a task can be added" do
