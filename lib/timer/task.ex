@@ -27,6 +27,14 @@ defmodule Timer.Task do
     {:noreply, %{state | started: true}}
   end
 
+  def handle_info(:tick, %{started: true, task: %{duration: 0, name: name}} = state) do
+    Registry.dispatch(Timer.Notifications, :expired, fn entries ->
+      for {_pid, {module, function}} <- entries, do: apply(module, function, [name])
+    end)
+
+    {:noreply, %{state | started: false}}
+  end
+
   def handle_info(:tick, %{started: true, task: %{duration: duration} = task} = state) do
     tick()
     {:noreply, %{state | task: %{task | duration: duration - 1}}}
