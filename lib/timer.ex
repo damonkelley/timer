@@ -10,7 +10,6 @@ defmodule Timer do
       Supervisor.child_spec({type, task}, start: {type, :start_link, [task, [name: via(name)]]})
 
     {:ok, pid} = DynamicSupervisor.start_child(Timer.TaskSupervisor, spec)
-    {:ok, _pid} = Registry.register(Timer.Notifications, :tick, pid)
 
     {:ok, [task]}
   end

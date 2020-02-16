@@ -2,11 +2,17 @@ defmodule Timer.Task do
   use GenServer
 
   def init(state) do
+    {:ok, _} = Registry.register(Timer.Notifications, :tick, {__MODULE__, :tick})
+
     {:ok, state}
   end
 
   def start_link(task, opts \\ []) do
     GenServer.start_link(__MODULE__, put_in(task, [:started], false), opts)
+  end
+
+  def tick(pid) do
+    GenServer.call(pid, :tick)
   end
 
   def handle_call(:get, _from, task) do
