@@ -7,7 +7,10 @@ defmodule Timer do
 
   def add(%{name: name} = task, type \\ Timer.Task) do
     spec =
-      Supervisor.child_spec({type, task}, start: {type, :start_link, [task, [name: via(name)]]})
+      Supervisor.child_spec(
+        {type, task},
+        start: {type, :start_link, [task, [name: via(name), notifications: Timer.Notifications]]}
+      )
 
     {:ok, _pid} = DynamicSupervisor.start_child(Timer.TaskSupervisor, spec)
 
